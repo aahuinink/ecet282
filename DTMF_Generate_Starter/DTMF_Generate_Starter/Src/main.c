@@ -26,11 +26,18 @@
 #include <math.h>
 #include "CS43L22.h"
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct Node
+{
+	struct Node* prev;
+	float value;
+	struct Node* next;
+}Node;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -52,7 +59,8 @@
 
 #define DSP
 
-
+#define KEY 770
+#define _USE_MATH_DEFINES
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -91,6 +99,7 @@ buffer_t buffer_to_fill = buffer_A;
 uint16_t sample;
 volatile bool_t transferComplete = TRUE;
 
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,8 +114,11 @@ uint16_t audio_read(void);
 uint16_t* select_buffer_to_transmit(buffer_t);
 
 void audio_buffer_init(void);   	//inicializo el audio buffer con ceros.
-void fill_buffers();
-void load_buffer(uint16_t *);
+void fill_buffers(float* numerator, float* denominator, Node* output, Node*input);
+void load_buffer(uint16_t* buff, float* numerator, float* denominator, Node* output, Node*input);
+
+Node* create_circ_buffer(int size);
+void update_output(float* numerator, float* denominator, Node* output, Node*input);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -156,6 +168,17 @@ int main(void)
 	HAL_TIM_Base_Start(&htim2); 	//activo el timer
 	HAL_ADC_Start_IT(&hadc1); 		// y el ADC
 
+	/* %%%%%%%%%%%%%%%%% compute filter coefficients %%%%%%%%%%%%%%%%%%%*/
+	float b1 = sin((float)KEY*M_PI/24000.0);
+	float a1 = 2*cos((float)KEY*M_PI/24000.0);
+	float a2 = -1;
+
+	float num[1] = {b1};
+	float denom[2] = {a1, a2};
+
+	/* %%%%%%%%%%%%%%%%% Declare circular buffers %%%%%%%%%%%%%%%%%%%*/
+	Node* x_buff = create_circ_buffer(3);
+	Node* y_buff = create_circ_buffer(3);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -181,8 +204,7 @@ int main(void)
 
 			adc_done = 0;
 
-			fill_buffers();
-
+			fill_buffers(num, denom, y_buff, x_buff);
 		}
 
   }
@@ -463,14 +485,19 @@ void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s)
 }
 
 
-void load_buffer(uint16_t *buff){
+void load_buffer(uint16_t *buff, float* numerator, float* denominator, Node* output, Node* input){
 
 	static size_t i = 0;
 
 #ifdef DSP
 
 	// your code goes here
-
+	// compute next output value
+	output = output->next;
+	input = input->next;
+	update_output(numerator, denominator, output, input);
+	int16_t sample1 = (int16_t)(output->value);
+	sample = (uint16_t)sample1;
 #endif
 	buff[i] = sample;
 
@@ -486,24 +513,23 @@ void load_buffer(uint16_t *buff){
 
 		flag = data_ready_to_send;
 		i=0;
-
 	}
 
 
 }
 
-void fill_buffers(){
+void fill_buffers(float* numerator, float* denominator, Node* output, Node* input){
 
 	if((buffer_to_fill == buffer_A)){
 
 		audioToUpdate = audioBufferA;
-		load_buffer(audioToUpdate);
+		load_buffer(audioToUpdate, numerator, denominator, output, input);
 
 	}
 	if((buffer_to_fill == buffer_B)){
 
 		audioToUpdate = audioBufferB;
-		load_buffer(audioToUpdate);
+		load_buffer(audioToUpdate, numerator, denominator, output, input);
 	}
 
 }
@@ -600,6 +626,43 @@ void CS43L22_EXTERNAL_DAC_enable()
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
 
 }
+
+void update_output(float* numerator, float* denominator, Node* output, Node* input)
+{
+	output->value = numerator[0]*(input->prev)->value + denominator[0]*(output->prev)->value + denominator[1]*(output->next->value);
+	return;
+}
+
+Node* create_circ_buffer(int size)
+{
+	// create head and current node pointers
+	Node* head = malloc(sizeof(Node));
+	Node* current = malloc(sizeof(Node));
+	Node* temp = malloc(sizeof(Node));
+
+	// set current pointer to head
+	current = head;
+
+	//decrement size by 1
+	size--;
+	// create the rest of the nodes
+	for (int i = 0; i < size; i++)
+	{
+		// create temporary node
+		Node* temp = malloc(sizeof(Node));
+		// point current to temp and vice versa
+		current->next = temp;
+		temp->prev = current;
+		// set current node to next node
+		current = temp;
+	}
+	// point head to tail and tail to head
+	head->prev = current;
+	current->next = head;
+	//return the start of the circular buffer
+	return head;
+}
+
 
 /* USER CODE END 4 */
 

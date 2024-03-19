@@ -1,0 +1,5 @@
+../Src/stm32f4xx_it.c:71:6:SVC_Handler	1
+../Src/stm32f4xx_it.c:84:6:PendSV_Handler	1
+../Src/stm32f4xx_it.c:97:6:SysTick_Handler	1
+../Src/stm32f4xx_it.c:118:6:ADC_IRQHandler	1
+../Src/stm32f4xx_it.c:132:6:SPI3_IRQHandler	1
