@@ -59,7 +59,8 @@ typedef struct Node
 
 #define DSP
 
-#define KEY 770
+#define ROW 770
+#define COLUMN 1209
 #define _USE_MATH_DEFINES
 /* USER CODE END PD */
 
@@ -100,8 +101,8 @@ uint16_t sample;
 volatile bool_t transferComplete = TRUE;
 
 // initialize circular buffer pointers and global coefficient variables
-Node* x_buff;
-Node* y_buff;
+Node* input_buffer;
+Node* row_buffer;
 float b1;
 float a1;
 float a2;
@@ -176,13 +177,15 @@ int main(void)
 	HAL_ADC_Start_IT(&hadc1); 		// y el ADC
 
 	/* %%%%%%%%%%%%%%%%% compute filter coefficients %%%%%%%%%%%%%%%%%%%*/
-	b1 = sin((float)KEY*M_PI/24000.0);
-	a1 = 2*cos((float)KEY*M_PI/24000.0);
+	b1 = sin((float)ROW*M_PI/24000.0);
+	a1 = 2*cos((float)ROW*M_PI/24000.0);
 	a2 = -1;
 
 	/* %%%%%%%%%%%%%%%%% Declare circular buffers %%%%%%%%%%%%%%%%%%%*/
-	x_buff = create_circ_buffer(3);
-	y_buff = create_circ_buffer(3);
+	input_buffer = create_circ_buffer(3);
+	row_buffer = create_circ_buffer(3);
+
+	input_buffer->value = 10000; // start the sine wave
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -496,14 +499,14 @@ void load_buffer(uint16_t *buff)
 
 #ifdef DSP
 	//move to next sample in buffer
-	y_buff = y_buff->next;
-	x_buff = x_buff->next;
+	row_buffer = row_buffer->next;
+	input_buffer = input_buffer->next;
 
 	// calculate new output value
 	update_output();
 
 	// cast to sample
-	int16_t sample1 = (int16_t)(y_buff->value);
+	int16_t sample1 = (int16_t)(row_buffer->value);
 	sample = (uint16_t)sample1;
 #endif
 
@@ -637,7 +640,7 @@ void CS43L22_EXTERNAL_DAC_enable()
 
 void update_output()
 {
-	y_buff->value = b1*(x_buff->prev)->value + a1*(y_buff->prev)->value + a2*(y_buff->next->value);
+	row_buffer->value = b1*(input_buffer->prev)->value + a1*(row_buffer->prev)->value + a2*(row_buffer->next->value);
 	return;
 }
 
