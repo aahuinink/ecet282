@@ -99,7 +99,12 @@ buffer_t buffer_to_fill = buffer_A;
 uint16_t sample;
 volatile bool_t transferComplete = TRUE;
 
-
+// initialize circular buffer pointers and global coefficient variables
+Node* x_buff;
+Node* y_buff;
+float b1;
+float a1;
+float a2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -114,11 +119,13 @@ uint16_t audio_read(void);
 uint16_t* select_buffer_to_transmit(buffer_t);
 
 void audio_buffer_init(void);   	//inicializo el audio buffer con ceros.
-void fill_buffers(float* numerator, float* denominator, Node* output, Node*input);
-void load_buffer(uint16_t* buff, float* numerator, float* denominator, Node* output, Node*input);
+void fill_buffers();
+void load_buffer(uint16_t* buff);
 
+// creates a circular buffer of size 'size'
 Node* create_circ_buffer(int size);
-void update_output(float* numerator, float* denominator, Node* output, Node*input);
+// updates the output
+void update_output();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -169,16 +176,13 @@ int main(void)
 	HAL_ADC_Start_IT(&hadc1); 		// y el ADC
 
 	/* %%%%%%%%%%%%%%%%% compute filter coefficients %%%%%%%%%%%%%%%%%%%*/
-	float b1 = sin((float)KEY*M_PI/24000.0);
-	float a1 = 2*cos((float)KEY*M_PI/24000.0);
-	float a2 = -1;
-
-	float num[1] = {b1};
-	float denom[2] = {a1, a2};
+	b1 = sin((float)KEY*M_PI/24000.0);
+	a1 = 2*cos((float)KEY*M_PI/24000.0);
+	a2 = -1;
 
 	/* %%%%%%%%%%%%%%%%% Declare circular buffers %%%%%%%%%%%%%%%%%%%*/
-	Node* x_buff = create_circ_buffer(3);
-	Node* y_buff = create_circ_buffer(3);
+	x_buff = create_circ_buffer(3);
+	y_buff = create_circ_buffer(3);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -204,7 +208,7 @@ int main(void)
 
 			adc_done = 0;
 
-			fill_buffers(num, denom, y_buff, x_buff);
+			fill_buffers();
 		}
 
   }
@@ -485,20 +489,24 @@ void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s)
 }
 
 
-void load_buffer(uint16_t *buff, float* numerator, float* denominator, Node* output, Node* input){
+void load_buffer(uint16_t *buff)
+{
 
 	static size_t i = 0;
 
 #ifdef DSP
+	//move to next sample in buffer
+	y_buff = y_buff->next;
+	x_buff = x_buff->next;
 
-	// your code goes here
-	// compute next output value
-	output = output->next;
-	input = input->next;
-	update_output(numerator, denominator, output, input);
-	int16_t sample1 = (int16_t)(output->value);
+	// calculate new output value
+	update_output();
+
+	// cast to sample
+	int16_t sample1 = (int16_t)(y_buff->value);
 	sample = (uint16_t)sample1;
 #endif
+
 	buff[i] = sample;
 
 	buff[i+1] =  buff[i];
@@ -518,18 +526,18 @@ void load_buffer(uint16_t *buff, float* numerator, float* denominator, Node* out
 
 }
 
-void fill_buffers(float* numerator, float* denominator, Node* output, Node* input){
+void fill_buffers(){
 
 	if((buffer_to_fill == buffer_A)){
 
 		audioToUpdate = audioBufferA;
-		load_buffer(audioToUpdate, numerator, denominator, output, input);
+		load_buffer(audioToUpdate);
 
 	}
 	if((buffer_to_fill == buffer_B)){
 
 		audioToUpdate = audioBufferB;
-		load_buffer(audioToUpdate, numerator, denominator, output, input);
+		load_buffer(audioToUpdate);
 	}
 
 }
@@ -627,9 +635,9 @@ void CS43L22_EXTERNAL_DAC_enable()
 
 }
 
-void update_output(float* numerator, float* denominator, Node* output, Node* input)
+void update_output()
 {
-	output->value = numerator[0]*(input->prev)->value + denominator[0]*(output->prev)->value + denominator[1]*(output->next->value);
+	y_buff->value = b1*(x_buff->prev)->value + a1*(y_buff->prev)->value + a2*(y_buff->next->value);
 	return;
 }
 
