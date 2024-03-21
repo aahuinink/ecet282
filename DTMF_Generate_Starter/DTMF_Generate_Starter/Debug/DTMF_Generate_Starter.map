@@ -4384,7 +4384,7 @@ LOAD C:/ST/STM32CubeIDE_1.13.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .comment       0x0000000000000043       0x44 ./Src/syscalls.o
  .comment       0x0000000000000043       0x44 ./Src/system_stm32f4xx.o
 
-.debug_info     0x0000000000000000    0x13f77
+.debug_info     0x0000000000000000    0x13f89
  .debug_info    0x0000000000000000      0x9f4 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
  .debug_info    0x00000000000009f4      0xe43 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.o
  .debug_info    0x0000000000001837      0xc6c ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.o
@@ -4398,12 +4398,12 @@ LOAD C:/ST/STM32CubeIDE_1.13.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_info    0x000000000000a0d5     0x399d ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
  .debug_info    0x000000000000da72     0x143d ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
  .debug_info    0x000000000000eeaf      0x3fc ./Src/CS43L22.o
- .debug_info    0x000000000000f2ab     0x203e ./Src/main.o
- .debug_info    0x00000000000112e9     0x169c ./Src/stm32f4xx_hal_msp.o
- .debug_info    0x0000000000012985      0x867 ./Src/stm32f4xx_it.o
- .debug_info    0x00000000000131ec      0x83d ./Src/syscalls.o
- .debug_info    0x0000000000013a29      0x52b ./Src/system_stm32f4xx.o
- .debug_info    0x0000000000013f54       0x23 ./startup/startup_stm32f407xx.o
+ .debug_info    0x000000000000f2ab     0x2050 ./Src/main.o
+ .debug_info    0x00000000000112fb     0x169c ./Src/stm32f4xx_hal_msp.o
+ .debug_info    0x0000000000012997      0x867 ./Src/stm32f4xx_it.o
+ .debug_info    0x00000000000131fe      0x83d ./Src/syscalls.o
+ .debug_info    0x0000000000013a3b      0x52b ./Src/system_stm32f4xx.o
+ .debug_info    0x0000000000013f66       0x23 ./startup/startup_stm32f407xx.o
 
 .debug_abbrev   0x0000000000000000     0x30df
  .debug_abbrev  0x0000000000000000      0x288 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
@@ -4660,7 +4660,7 @@ LOAD C:/ST/STM32CubeIDE_1.13.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_macro   0x0000000000022b02       0xce ./Src/syscalls.o
  .debug_macro   0x0000000000022bd0      0x216 ./Src/system_stm32f4xx.o
 
-.debug_line     0x0000000000000000    0x16c20
+.debug_line     0x0000000000000000    0x16c21
  .debug_line    0x0000000000000000      0xb0e ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
  .debug_line    0x0000000000000b0e     0x14ac ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.o
  .debug_line    0x0000000000001fba     0x10b0 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.o
@@ -4674,14 +4674,14 @@ LOAD C:/ST/STM32CubeIDE_1.13.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_line    0x000000000000e69b     0x38a7 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.o
  .debug_line    0x0000000000011f42     0x132d ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.o
  .debug_line    0x000000000001326f      0x511 ./Src/CS43L22.o
- .debug_line    0x0000000000013780     0x101d ./Src/main.o
- .debug_line    0x000000000001479d      0x9dd ./Src/stm32f4xx_hal_msp.o
- .debug_line    0x000000000001517a      0x7fe ./Src/stm32f4xx_it.o
- .debug_line    0x0000000000015978      0x9ad ./Src/syscalls.o
- .debug_line    0x0000000000016325      0x883 ./Src/system_stm32f4xx.o
- .debug_line    0x0000000000016ba8       0x78 ./startup/startup_stm32f407xx.o
+ .debug_line    0x0000000000013780     0x101e ./Src/main.o
+ .debug_line    0x000000000001479e      0x9dd ./Src/stm32f4xx_hal_msp.o
+ .debug_line    0x000000000001517b      0x7fe ./Src/stm32f4xx_it.o
+ .debug_line    0x0000000000015979      0x9ad ./Src/syscalls.o
+ .debug_line    0x0000000000016326      0x883 ./Src/system_stm32f4xx.o
+ .debug_line    0x0000000000016ba9       0x78 ./startup/startup_stm32f407xx.o
 
-.debug_str      0x0000000000000000    0xd20f9
+.debug_str      0x0000000000000000    0xd20fe
  .debug_str     0x0000000000000000    0xc7564 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
                                       0xc78e0 (size before relaxing)
  .debug_str     0x00000000000c7564      0x677 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.o
@@ -4708,17 +4708,17 @@ LOAD C:/ST/STM32CubeIDE_1.13.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
                                       0xc771e (size before relaxing)
  .debug_str     0x00000000000cb10d      0x81e ./Src/CS43L22.o
                                        0x4571 (size before relaxing)
- .debug_str     0x00000000000cb92b     0x46aa ./Src/main.o
-                                      0xcca51 (size before relaxing)
- .debug_str     0x00000000000cffd5       0x25 ./Src/stm32f4xx_hal_msp.o
+ .debug_str     0x00000000000cb92b     0x46af ./Src/main.o
+                                      0xcca56 (size before relaxing)
+ .debug_str     0x00000000000cffda       0x25 ./Src/stm32f4xx_hal_msp.o
                                       0xc80d4 (size before relaxing)
- .debug_str     0x00000000000cfffa       0x63 ./Src/stm32f4xx_it.o
+ .debug_str     0x00000000000cffff       0x63 ./Src/stm32f4xx_it.o
                                       0xc7573 (size before relaxing)
- .debug_str     0x00000000000d005d     0x2015 ./Src/syscalls.o
+ .debug_str     0x00000000000d0062     0x2015 ./Src/syscalls.o
                                        0x9911 (size before relaxing)
- .debug_str     0x00000000000d2072       0x5a ./Src/system_stm32f4xx.o
+ .debug_str     0x00000000000d2077       0x5a ./Src/system_stm32f4xx.o
                                       0xc6d79 (size before relaxing)
- .debug_str     0x00000000000d20cc       0x2d ./startup/startup_stm32f407xx.o
+ .debug_str     0x00000000000d20d1       0x2d ./startup/startup_stm32f407xx.o
                                          0x7c (size before relaxing)
 
 .debug_frame    0x0000000000000000     0x29e4

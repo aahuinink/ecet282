@@ -667,6 +667,7 @@ Node* create_circ_buffer(int size)
 	// point head to tail and tail to head
 	head->prev = current;
 	current->next = head;
+	free(temp);
 	//return the start of the circular buffer
 	return head;
 }

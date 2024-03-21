@@ -12,4 +12,4 @@
 ../Src/main.c:529:6:fill_buffers	8	static
 ../Src/main.c:644:7:create_circ_buffer	24	static
 ../Src/main.c:140:5:main	56	static
-../Src/main.c:681:6:Error_Handler	0	static
+../Src/main.c:682:6:Error_Handler	0	static
