@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-#define COLUMN 300
-#define ROW 500
-#define SIZE 500
+#define COLUMN 770
+#define ROW 1209
+#define SIZE 1024
 
 typedef struct Node
 {
@@ -43,7 +43,7 @@ int sample = 0;
 // add your main loop code here
 int main()
 {
-	int samples [SIZE];
+	int samples[SIZE];
 	// your non-loop code here
 	/* %%%%%%%%%%%%%%%%% compute filter coefficients %%%%%%%%%%%%%%%%%%%*/
 
