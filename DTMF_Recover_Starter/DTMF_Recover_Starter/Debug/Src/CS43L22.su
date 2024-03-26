@@ -1,0 +1,3 @@
+CS43L22.c:88:6:CS43L22_write	16	static
+CS43L22.c:9:6:CS43L22_init	24	static
+CS43L22.c:99:6:CS43L22_AudioSend	0	static

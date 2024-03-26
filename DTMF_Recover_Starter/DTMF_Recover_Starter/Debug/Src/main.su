@@ -1,0 +1,14 @@
+main.c:207:6:SystemClock_Config	112	static
+main.c:464:6:HAL_I2S_TxCpltCallback	0	static
+main.c:522:6:HAL_ADC_ConvCpltCallback	0	static
+main.c:531:11:select_buffer_to_transmit	0	static
+main.c:549:6:audio_buffer_init	0	static
+main.c:563:10:audio_read	8	static
+main.c:476:6:load_buffer	8	static
+main.c:506:6:fill_buffers	8	static
+main.c:131:5:main	56	static
+main.c:586:6:CS43L22_EXTERNAL_DAC_I2S_transmit	0	static
+main.c:593:6:CS43L22_EXTERNAL_DAC_I2C_write	16	static
+main.c:600:6:CS43L22_EXTERNAL_DAC_I2C_recieve	16	static
+main.c:606:6:CS43L22_EXTERNAL_DAC_enable	0	static
+main.c:621:6:Error_Handler	0	static
