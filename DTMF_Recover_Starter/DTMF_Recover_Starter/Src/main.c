@@ -26,6 +26,7 @@
 #include <math.h>
 #include "CS43L22.h"
 #include <string.h>
+#include <stdio.h>
 //#include "sin256.h""
 
 /* USER CODE END Includes */
@@ -103,7 +104,8 @@ volatile bool_t transferComplete = TRUE;
 
 COMPLEX w[PTS];
 COMPLEX samples[PTS];
-
+int sample_index;
+int peaks[PTS];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -121,6 +123,8 @@ void audio_buffer_init(void);   	//inicializo el audio buffer con ceros.
 void fill_buffers();
 void load_buffer(uint16_t *);
 void FFT(COMPLEX *, int);
+void find_peaks(int *);
+int __io_putchar(int ch);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -180,7 +184,11 @@ int main(void)
 	{
 		w[i].real = cos(2.0 * M_PI * (float)i / PTS);
 		w[i].imag = sin(2.0 * M_PI * (float)i / PTS);
+		samples[i].real = 0;
+		samples[i].imag = 0;
 	}
+
+	sample_index = 0;
 
   /* USER CODE END 2 */
 
@@ -497,6 +505,38 @@ void load_buffer(uint16_t *buff){
 
 #ifdef DSP
 
+	samples[sample_index].real = (float)sample;
+	samples[sample_index].imag = 0.0;
+
+	sample_index++;
+
+	if(sample_index == PTS)
+	{
+		FFT(samples, PTS);
+		sample_index = 0;
+
+		int output[PTS];
+
+		for (int i = 0; i< PTS; i++)
+		{
+			output[i] = sqrt(((int)((samples[i].real))^2) + ((int)((samples[i].imag))^2));
+		}
+
+		find_peaks(output);
+
+		float freq1 = 0.0;
+		float freq2 = 0.0;
+
+		for (int i = 0; i < PTS; i ++)
+		{
+			if(peaks[i] == 0) {}
+			else
+			{
+				printf("%d\n", output[i]);
+			}
+		}
+	}
+
 
 
 #endif
@@ -627,6 +667,56 @@ void CS43L22_EXTERNAL_DAC_enable()
 
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
 
+}
+
+void find_peaks(int* spectrum)
+{
+	// create an edge detection kernel
+	int kernel[3] = {0, -1, 1};
+
+	// create a peaks array
+	int value;
+	int edges[PTS];
+
+	// sum variable for average
+	int sum = 0;
+
+	for (int i = 2; i < PTS; i++)
+	{
+		// find edges
+		value =
+			spectrum[i]*kernel[2] +
+			spectrum[i-1]*kernel[1] +
+			spectrum[i-2]*kernel[0];
+
+		// add
+		edges[i-2]=value;
+		sum += value;
+	}
+
+	// find peaks larger than average that are separated by more than 2 spots
+	int average = sum/(PTS);
+	int close_peaks=0;
+	for (int i = 0; i < PTS; i++)
+	{
+		if((edges[i] > (average + 30)) & (close_peaks == 0))
+		{
+			peaks[i] = i;
+			close_peaks = 2;
+		}
+		else
+		{
+			close_peaks <= 0 ? close_peaks = 0 : close_peaks--;
+			peaks[i] = 0;
+		}
+	}
+	return;
+}
+
+int __io_putchar(int ch)
+{
+	ITM_SendChar(ch);
+	return 0;
 }
 
 /* USER CODE END 4 */

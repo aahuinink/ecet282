@@ -38,6 +38,10 @@ typedef struct Node
 	float value;
 	struct Node* next;
 }Node;
+
+typedef struct {
+	float numerator[3], denominator[3];
+}DE;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -62,6 +66,7 @@ typedef struct Node
 #define ROW 770
 #define COLUMN 1209
 #define _USE_MATH_DEFINES
+#define START_VAL 500
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -103,9 +108,10 @@ volatile bool_t transferComplete = TRUE;
 // initialize circular buffer pointers and global coefficient variables
 Node* input_buffer;
 Node* row_buffer;
-float b1;
-float a1;
-float a2;
+Node* column_buffer;
+
+DE row_diffeq;
+DE column_diffeq;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -125,8 +131,9 @@ void load_buffer(uint16_t* buff);
 
 // creates a circular buffer of size 'size'
 Node* create_circ_buffer(int size);
-// updates the output
-void update_output();
+// calculates the next sample
+float next_sample(DE diff_eq, Node* buffer);
+DE create_diff_eq(int freq);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -177,15 +184,15 @@ int main(void)
 	HAL_ADC_Start_IT(&hadc1); 		// y el ADC
 
 	/* %%%%%%%%%%%%%%%%% compute filter coefficients %%%%%%%%%%%%%%%%%%%*/
-	b1 = sin((float)ROW*M_PI/24000.0);
-	a1 = 2*cos((float)ROW*M_PI/24000.0);
-	a2 = -1;
+	row_diffeq = create_diff_eq(ROW);
+	column_diffeq = create_diff_eq(COLUMN);
 
 	/* %%%%%%%%%%%%%%%%% Declare circular buffers %%%%%%%%%%%%%%%%%%%*/
 	input_buffer = create_circ_buffer(3);
 	row_buffer = create_circ_buffer(3);
+	column_buffer = create_circ_buffer(3);
 
-	input_buffer->value = 10000; // start the sine wave
+	input_buffer->value = START_VAL; // start the sine wave
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -500,13 +507,15 @@ void load_buffer(uint16_t *buff)
 #ifdef DSP
 	//move to next sample in buffer
 	row_buffer = row_buffer->next;
+	column_buffer = column_buffer->next;
 	input_buffer = input_buffer->next;
 
 	// calculate new output value
-	update_output();
+	row_buffer->value = next_sample(row_diffeq, row_buffer);
+	column_buffer->value = next_sample(column_diffeq, column_buffer);
 
 	// cast to sample
-	int16_t sample1 = (int16_t)(row_buffer->value);
+	int16_t sample1 = (int16_t)(row_buffer->value + column_buffer->value);
 	sample = (uint16_t)sample1;
 #endif
 
@@ -638,18 +647,24 @@ void CS43L22_EXTERNAL_DAC_enable()
 
 }
 
-void update_output()
+float next_sample(DE diff_eq, Node* buffer)
 {
-	row_buffer->value = b1*(input_buffer->prev)->value + a1*(row_buffer->prev)->value + a2*(row_buffer->next->value);
-	return;
+	float value = 0;
+	for (int i = 0; i <3; i++)
+	{
+		value += (buffer->value)*diff_eq.denominator[i] + (input_buffer->value)*diff_eq.numerator[i];
+		buffer = buffer->prev;
+		input_buffer = input_buffer->prev;
+	}
+	return value;
 }
 
 Node* create_circ_buffer(int size)
 {
 	// create head and current node pointers
 	Node* head = malloc(sizeof(Node));
-	Node* current = malloc(sizeof(Node));
-	Node* temp = malloc(sizeof(Node));
+	head->value = 0.0;
+	Node* current;
 
 	// set current pointer to head
 	current = head;
@@ -661,6 +676,7 @@ Node* create_circ_buffer(int size)
 	{
 		// create temporary node
 		Node* temp = malloc(sizeof(Node));
+		temp->value = 0.0;
 		// point current to temp and vice versa
 		current->next = temp;
 		temp->prev = current;
@@ -670,12 +686,23 @@ Node* create_circ_buffer(int size)
 	// point head to tail and tail to head
 	head->prev = current;
 	current->next = head;
-	free(temp);
 	//return the start of the circular buffer
 	return head;
 }
 
+DE create_diff_eq(int freq)
+{
+	DE diff_eq;
+	diff_eq.numerator[0] = 0;
+	diff_eq.numerator[1] = sin((float)freq*M_PI/24000.0);
+	diff_eq.numerator[2] = 0;
 
+	diff_eq.denominator[0] = 0;
+	diff_eq.denominator[1] = 2*cos((float)freq*M_PI/24000.0);
+	diff_eq.denominator[2] = -1;
+
+	return diff_eq;
+}
 /* USER CODE END 4 */
 
 /**
