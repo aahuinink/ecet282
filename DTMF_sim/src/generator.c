@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-#define COLUMN 770
-#define ROW 1209
-#define SIZE 1024
+#define COLUMN 500
+#define ROW 0
+#define SIZE 48000
 
 typedef struct Node
 {
@@ -55,9 +55,9 @@ int main()
 	row_buffer = create_circ_buffer(3);
 	column_buffer = create_circ_buffer(3);
 
-	input_buffer->value = 10000; // start the sine wave
+	input_buffer->value = 100; // start the sine wave
 
-	int fd = open("fifo_pipe", O_WRONLY | O_BINARY);
+	int fd = open("fifo_pipe", O_WRONLY | O_BINARY | O_CREAT);
 	for (int i = 0; i<SIZE; i++)
 	{
 		// put your load_buffer code here
@@ -75,7 +75,7 @@ int main()
 
 		// cast to sample
 		int sample1 = (int)(row_buffer->value + column_buffer->value);
-		samples[i] = sample1;
+		samples[i]= sample1;
 	}
 	write(fd, samples, SIZE * sizeof(int));
 	close(fd);
