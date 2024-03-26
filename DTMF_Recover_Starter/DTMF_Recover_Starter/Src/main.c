@@ -32,7 +32,10 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+typedef struct
+{
+	float real, imag;
+}COMPLEX;
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -51,6 +54,7 @@
 // defino si quiero usar efectos en el camino de la senial
 
 #define DSP
+#define PTS 1024
 
 // defino la cantidad maxima de muestras que voy a reservar para el buffer del delay
 
@@ -97,6 +101,9 @@ buffer_t buffer_to_fill = buffer_A;
 uint16_t sample;
 volatile bool_t transferComplete = TRUE;
 
+COMPLEX w[PTS];
+COMPLEX samples[PTS];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,6 +120,7 @@ uint16_t* select_buffer_to_transmit(buffer_t);
 void audio_buffer_init(void);   	//inicializo el audio buffer con ceros.
 void fill_buffers();
 void load_buffer(uint16_t *);
+void FFT(COMPLEX *, int);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -166,6 +174,13 @@ int main(void)
 
 	HAL_TIM_Base_Start(&htim2); 	//activo el timer
 	HAL_ADC_Start_IT(&hadc1); 		// y el ADC
+
+	// calculate twiddle factors
+	for (int i = 0; i < PTS; i++)
+	{
+		w[i].real = cos(2.0 * M_PI * (float)i / PTS);
+		w[i].imag = sin(2.0 * M_PI * (float)i / PTS);
+	}
 
   /* USER CODE END 2 */
 
@@ -481,6 +496,8 @@ void load_buffer(uint16_t *buff){
 	sample = audio_read();
 
 #ifdef DSP
+
+
 
 #endif
 
