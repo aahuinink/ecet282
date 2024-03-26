@@ -524,6 +524,8 @@ void load_buffer(uint16_t *buff){
 
 		find_peaks(output);
 
+		printf("%d\n", output[99]);
+/*
 		float freq1 = 0.0;
 		float freq2 = 0.0;
 
@@ -532,9 +534,9 @@ void load_buffer(uint16_t *buff){
 			if(peaks[i] == 0) {}
 			else
 			{
-				printf("%d\n", output[i]);
+				printf("%d\n", i);
 			}
-		}
+		}*/
 	}
 
 
