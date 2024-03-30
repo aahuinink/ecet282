@@ -3,12 +3,13 @@
 #include <math.h>
 
 #define PTS 1024
-#define PTS 1024 // # of points for FFT
 typedef struct
 {
     float real, imag;
 } COMPLEX;
+
 COMPLEX w[PTS]; // twiddle constants stored in w
+
 void FFT(COMPLEX* Y, int N);
 
 int main()
