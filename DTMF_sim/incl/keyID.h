@@ -16,7 +16,7 @@
 
 // define sampling frequency
 #define FS 48000
-
+#define THRESHOLD 1.5
 
 char identify_dtmf_key(COMPLEX* samples, int N);
 
