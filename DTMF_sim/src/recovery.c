@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <math.h>
-#include "keyID.h"
+#include "../incl/keyID.h"
 
 #define PTS 1024
-typedef struct
-{
-    float real, imag;
-} COMPLEX;
 
 COMPLEX w[PTS]; // twiddle constants stored in w
 
@@ -17,27 +13,27 @@ int main()
 {
     // key character
     char key;
-    // open the file
-    int fd = open("fifo_pipe", O_RDONLY);
+    // OPEN THE FILE
+    INT FD = OPEN("FIFO_PIPE", O_RDONLY);
     
-    // create sample array
-    COMPLEX samples[PTS];
+    // CREATE SAMPLE ARRAY
+    COMPLEX SAMPLES[PTS];
 
-    int input[PTS];
+    INT INPUT[PTS];
 
-    // read from file
-    read(fd, input, PTS * PTSof(int));
+    // READ FROM FILE
+    READ(FD, INPUT, PTS * PTS(INT));
 
-    for(int i = 0; i<PTS; i++)
+    FOR(INT I = 0; I<PTS; I++)
     {
-        samples[i].real = input[i];
-        samples[i].imag = 0;
+        SAMPLES[I].REAL = INPUT[I];
+        SAMPLES[I].IMAG = 0;
     }
-    // calculate twiddle factors
-    for (int i = 0; i < PTS; i++)
+    // CALCULATE TWIDDLE FACTORS
+    FOR (INT I = 0; I < PTS; I++)
     {
-        w[i].real = cos(2.0 * M_PI * (float)i / PTS);
-        w[i].imag = sin(2.0 * M_PI * (float)i / PTS);
+        W[I].REAL = COS(2.0 * M_PI * (FLOAT)I / PTS);
+        W[I].IMAG = SIN(2.0 * M_PI * (FLOAT)I / PTS);
     }
 
     key = identify_dtmf_key(samples, PTS);
