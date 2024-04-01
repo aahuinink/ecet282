@@ -27,16 +27,14 @@
 #include "CS43L22.h"
 #include <string.h>
 #include <stdio.h>
+#include "keyID.h"
 //#include "sin256.h""
 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef struct
-{
-	float real, imag;
-}COMPLEX;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -55,7 +53,6 @@ typedef struct
 // defino si quiero usar efectos en el camino de la senial
 
 #define DSP
-#define PTS 1024
 
 // defino la cantidad maxima de muestras que voy a reservar para el buffer del delay
 
@@ -101,7 +98,6 @@ buffer_t buffer_to_fill = buffer_A;
 
 uint16_t sample;
 volatile bool_t transferComplete = TRUE;
-
 COMPLEX w[PTS];
 COMPLEX samples[PTS];
 int sample_index;
@@ -122,7 +118,6 @@ uint16_t* select_buffer_to_transmit(buffer_t);
 void audio_buffer_init(void);   	//inicializo el audio buffer con ceros.
 void fill_buffers();
 void load_buffer(uint16_t *);
-void FFT(COMPLEX *, int);
 void find_peaks(int *);
 int __io_putchar(int ch);
 /* USER CODE END PFP */
@@ -512,31 +507,16 @@ void load_buffer(uint16_t *buff){
 
 	if(sample_index == PTS)
 	{
-		FFT(samples, PTS);
-		sample_index = 0;
-
-		int output[PTS];
-
-		for (int i = 0; i< PTS; i++)
+		char key;
+		key = identify_dtmf_key(samples, PTS);
+		if(key == 'x')
 		{
-			output[i] = sqrt(((int)((samples[i].real))^2) + ((int)((samples[i].imag))^2));
+			printf("No key present\n");
 		}
-
-		find_peaks(output);
-
-		printf("%d\n", output[99]);
-/*
-		float freq1 = 0.0;
-		float freq2 = 0.0;
-
-		for (int i = 0; i < PTS; i ++)
+		else
 		{
-			if(peaks[i] == 0) {}
-			else
-			{
-				printf("%d\n", i);
-			}
-		}*/
+			printf("key is: %c\n", key);
+		}
 	}
 
 
