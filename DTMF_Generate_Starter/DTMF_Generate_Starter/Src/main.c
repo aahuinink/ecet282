@@ -66,7 +66,7 @@ typedef struct {
 #define ROW 770
 #define COLUMN 1209
 #define _USE_MATH_DEFINES
-#define START_VAL 500
+#define START_VAL 3000
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/

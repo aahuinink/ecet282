@@ -101,7 +101,32 @@ volatile bool_t transferComplete = TRUE;
 COMPLEX w[PTS];
 COMPLEX samples[PTS];
 int sample_index;
-int peaks[PTS];
+// create spectrum data array
+float spectrum[PTS];
+
+// create average value for later
+float average = 0.0;
+
+// dtmf frequency array
+int row_freq[4] = {697, 770, 852, 941};
+int column_freq[4] = {1209, 1336, 1477, 1633};
+float bin_size = ((float)FS)/((float)PTS);
+
+// row index array
+int dtmf_row[4];
+int dtmf_column[4];
+// key array TODO
+	// row and column index variables
+int row_index = 5;
+int column_index = 5;
+	// key character array
+char keys[4][4] =
+{
+	{'1','2','3','A'},
+	{'4','5','6','B'},
+	{'7','8','9','C'},
+	{'*','0','#','D'}
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -181,6 +206,18 @@ int main(void)
 		w[i].imag = sin(2.0 * M_PI * (float)i / PTS);
 		samples[i].real = 0;
 		samples[i].imag = 0;
+	}
+
+	// calculate key row indicies
+	for (int row = 0; row < 4; row++)
+	{
+		dtmf_row[row] = (int)(((float)row_freq[row])/bin_size + 0.5); // round to nearest integer
+	}
+
+	// calculate key column indices
+	for (int column = 0; column < 4; column++)
+	{
+		dtmf_column[column] = (int)(((float)column_freq[column])/bin_size + 0.5); // round to nearest integer
 	}
 
 	sample_index = 0;
@@ -498,6 +535,8 @@ void load_buffer(uint16_t *buff){
 
 	sample = audio_read();
 
+
+
 #ifdef DSP
 
 	samples[sample_index].real = (float)sample;
@@ -508,7 +547,65 @@ void load_buffer(uint16_t *buff){
 	if(sample_index == PTS)
 	{
 		char key;
-		key = identify_dtmf_key(samples, PTS);
+		// calculate FFT
+		FFT(samples, PTS);
+
+		// convert to magnitude spectrum data and calculate the average sample value
+		for (int index = 0; index < PTS; index++)
+		{
+			double mag = pow(samples[index].real, 2) + pow(samples[index].imag, 2);
+			spectrum[index] = sqrt(mag);
+
+		}
+
+		// caluclate average
+		int count = 0;
+		for (int i = dtmf_row[0]; i < dtmf_column[3]; i++)
+		{
+			average += spectrum[i];
+			count++;
+		}
+		average = average / (float)count;
+
+		// calculate peak cutoff
+		float cutoff = average*THRESHOLD;
+		float row_peak = 0.0;
+		float column_peak = 0.0;
+
+		row_index = 5;
+		column_index = 5;
+
+		// check magnitude spectrum for peaks at key indexes
+
+		for(int index = 0; index < 4; index++)
+		{
+			// check if a key has a peak larger than the cutoff AND larger than the current largest peak found
+				// for the rows
+			if((spectrum[dtmf_row[index]] > cutoff) & (spectrum[dtmf_row[index]] > row_peak))
+			{
+				row_peak = spectrum[dtmf_row[index]];
+				row_index = index;
+			}
+
+				// for the columns
+			if((spectrum[dtmf_column[index]] > cutoff) & (spectrum[dtmf_column[index]] > column_peak))
+			{
+				column_peak = spectrum[dtmf_column[index]];
+				column_index = index;
+			}
+		}
+
+		// if no key, return 'x', else index to the key array and return that key
+		if ((row_index > 4) | (column_index > 4))
+		{
+			key = 'x';
+		}
+		else
+		{
+			key=keys[row_index][column_index];
+		}
+
+		// print out key
 		if(key == 'x')
 		{
 			printf("No key present\n");
@@ -517,6 +614,8 @@ void load_buffer(uint16_t *buff){
 		{
 			printf("key is: %c\n", key);
 		}
+
+		sample_index = 0;
 	}
 
 
@@ -649,50 +748,6 @@ void CS43L22_EXTERNAL_DAC_enable()
 
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_4, GPIO_PIN_SET);
 
-}
-
-void find_peaks(int* spectrum)
-{
-	// create an edge detection kernel
-	int kernel[3] = {0, -1, 1};
-
-	// create a peaks array
-	int value;
-	int edges[PTS];
-
-	// sum variable for average
-	int sum = 0;
-
-	for (int i = 2; i < PTS; i++)
-	{
-		// find edges
-		value =
-			spectrum[i]*kernel[2] +
-			spectrum[i-1]*kernel[1] +
-			spectrum[i-2]*kernel[0];
-
-		// add
-		edges[i-2]=value;
-		sum += value;
-	}
-
-	// find peaks larger than average that are separated by more than 2 spots
-	int average = sum/(PTS);
-	int close_peaks=0;
-	for (int i = 0; i < PTS; i++)
-	{
-		if((edges[i] > (average + 30)) & (close_peaks == 0))
-		{
-			peaks[i] = i;
-			close_peaks = 2;
-		}
-		else
-		{
-			close_peaks <= 0 ? close_peaks = 0 : close_peaks--;
-			peaks[i] = 0;
-		}
-	}
-	return;
 }
 
 int __io_putchar(int ch)

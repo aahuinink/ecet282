@@ -8,13 +8,13 @@
 * @return key - the character of the key pressed. If no key present it returns 'x'.
 */
 
-char identify_dtmf_key(COMPLEX *samples, int N)
+char identify_dtmf_key(COMPLEX *samples)
 {
 	// create key variable
 	char key = 'x';
 
 	// create spectrum data array
-	float spectrum[N];
+	float spectrum[PTS];
 
 	// create average value for later
 	float average = 0.0;
@@ -22,7 +22,7 @@ char identify_dtmf_key(COMPLEX *samples, int N)
 	// dtmf frequency array
 	int row_freq[4] = {697, 770, 852, 941};
 	int column_freq[4] = {1209, 1336, 1477, 1633};
-	float bin_size = ((float)FS)/((float)N);
+	float bin_size = ((float)FS)/((float)PTS);
 
 	// row index array
 	int dtmf_row[4];
@@ -52,10 +52,10 @@ char identify_dtmf_key(COMPLEX *samples, int N)
 	}
 
 	// calculate FFT
-	FFT(samples, N);
+	FFT(samples, PTS);
 
 	// convert to magnitude spectrum data and calculate the average sample value
-	for (int index = 0; index < N; index++)
+	for (int index = 0; index < PTS; index++)
 	{
 		double mag = pow(samples[index].real, 2) + pow(samples[index].imag, 2);
 		spectrum[index] = sqrt(mag);
@@ -64,7 +64,7 @@ char identify_dtmf_key(COMPLEX *samples, int N)
 	}
 
 	// caluclate average
-	average = average / (float)N;
+	average = average / (float)PTS;
 
 	// calculate peak cutoff
 	float cutoff = average*THRESHOLD;
